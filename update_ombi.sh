@@ -176,7 +176,7 @@ if [ $running -eq 1 ]; then
     while [ $i -le $j ]
     do
         if [ $scriptuser = "root" ]; then
-            systemctl systemctl start $ombiservicename.service > /dev/null 2>&1
+            systemctl start $ombiservicename.service > /dev/null 2>&1
         else
             sudo systemctl start $ombiservicename.service > /dev/null 2>&1
         fi    
