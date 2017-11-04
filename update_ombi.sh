@@ -147,6 +147,7 @@ if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
         if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" == "active" ] ; then
             if [ $i -lt $j ]; then
                 .log 3 "Failed to stop Ombi...[attempt $i of $j]"
+				sleep 1
             else
                 .log 2 "Failed to stop Ombi...[attempt $i of $j]...Bailing!"
                 exit 2
@@ -176,13 +177,14 @@ if [ $running -eq 1 ]; then
     while [ $i -le $j ]
     do
         if [ $scriptuser = "root" ]; then
-            systemctl systemctl start $ombiservicename.service > /dev/null 2>&1
+            systemctl start $ombiservicename.service > /dev/null 2>&1
         else
             sudo systemctl start $ombiservicename.service > /dev/null 2>&1
-        fi    
+        fi
         if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" != "active" ] ; then
             if [ $i -lt $j ]; then
                 .log 3 "Failed to start Ombi...[attempt $i of $j]"
+				sleep 1
             else
                 .log 2 "Failed to start Ombi...[attempt $i of $j]...Bailing!"
                exit 3
