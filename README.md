@@ -34,7 +34,7 @@ sudo ./update_ombi.sh
 ```
 
 If you do not plan to run the script as a user with full sudo privileges, you can restrict access for the user with the following:  
-Edit the sudoers file to give restricted access to the scrupt user
+Edit the sudoers file to give restricted access to the script user
 ```
 sudo visudo
 ```
