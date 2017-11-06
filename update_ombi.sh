@@ -1,20 +1,36 @@
 #!/bin/bash
 
-## Ensure this is set to the name ##
-##  of your Ombi systemd service  ##
+## update_ombi systemd script   ##
+## Make configuration updates   ##
+## by changing update_ombi.conf ##
+## and store it in the same dir ##
+## that runs update_ombi.sh 	##
+
+
+## The systemd unit for Ombi  ##
 ombiservicename="ombi"
 
-##   Default variables   ##
-## Change only if needed ##
+## The update_ombi update log file ##
 logfile="/var/log/ombiupdater.log"
+
+## The path and file of your ombi.service file ##
 ombiservicefile="/etc/systemd/system/$ombiservicename.service"
+
+## Ombi's installed directory ##
 defaultinstalldir="/opt/Ombi"
+
+## User and Group Ombi runs as ##
 defaultuser="ombi"
 defaultgroup="nogroup"
+
+## Level of verbosity ##
 declare -i verbosity=-1
 
 ## Do not modify anything below this line ##
 ##   unless you know what you are doing   ##
+
+# Import any custom config to override the defaults, if necessary
+source "$(dirname $0)/update_ombi.conf" >/dev/null 2>&1
 
 while [ $# -gt 0 ]; do
   case "$1" in
