@@ -1,46 +1,73 @@
 #!/bin/bash
 
-## update_ombi systemd script   ##
-## Make configuration updates   ##
-## by changing update_ombi.conf ##
-## and store it in the same dir ##
-## that runs update_ombi.sh 	##
+####################################
+##   update_ombi systemd script   ##
+## GitHub: Unimatrix0/update_ombi ##
+####################################
 
+####################################
+##  Override default settings by  ##
+##  creating update_ombi.conf in  ##
+##  the same directory that the   ##
+##  script is running in and set  ##
+##  the required variables there  ##
+####################################
 
-## The systemd unit for Ombi  ##
+##   The systemd unit for Ombi    ##
 ombiservicename="ombi"
 
-## The update_ombi update log file ##
+##    The update_ombi log file    ##
 logfile="/var/log/ombiupdater.log"
 
-## The path and file of your ombi.service file ##
+####################################
+##  The remaining variables only  ##
+##  need to be set or overridden  ##
+##  if the script is unable to    ##
+##  parse the ombi.service file   ##
+##  for the correct settings      ##
+####################################
+## !! This should never happen !! ##
+####################################
+
+##  The service file's full path  ##
 ombiservicefile="/etc/systemd/system/$ombiservicename.service"
 
-## Ombi's installed directory ##
+##     Ombi install directory     ##
 defaultinstalldir="/opt/Ombi"
 
-## User and Group Ombi runs as ##
+##   User and Group Ombi runs as  ##
 defaultuser="ombi"
 defaultgroup="nogroup"
 
-## Level of verbosity ##
+##       Level of verbosity       ##
+##        By default, none        ##
+
 declare -i verbosity=-1
 
+############################################
 ## Do not modify anything below this line ##
 ##   unless you know what you are doing   ##
+############################################
 
-# Import any custom config to override the defaults, if necessary
-source "$(dirname $0)/update_ombi.conf" >/dev/null 2>&1
+name="update_ombi"
+version="1.0.12"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --verbosity|-v=*)
-      verbosity="${1#*=}"
+      if [[ ${1#*=} =~ ^-?[0-8]$ ]]; then
+          verbosity="${1#*=}"
+      else
+	      printf "****************************\n"
+          printf "* Error: Invalid verbosity.*\n"
+          printf "****************************\n"
+          exit 1
+	  fi
       ;;
     *)
-      printf "***************************\n"
-      printf "* Error: Invalid argument.*\n"
-      printf "***************************\n"
+      printf "****************************\n"
+      printf "* Error: Invalid argument. *\n"
+      printf "****************************\n"
       exit 1
   esac
   shift
@@ -72,7 +99,22 @@ unzip-strip() (
     fi && rm -rf "$temp"/* "$temp"
 )
 
-.log 6 "Verboity level: [${LOG_LEVELS[$verbosity]}]"
+# Import any custom config to override the defaults, if necessary
+configfile="$(dirname $0)/update_ombi.conf"
+if [ -e $configfile ]; then
+    source $configfile > /dev/null 2>&1
+    .log 6 "Script config file found...parsing..."
+    if [ $? -ne 0 ] ; then
+        .log 3 "Unable to use config file...using defaults..."
+    else
+        .log 6 "Parsed config file"
+    fi
+else
+    .log 6 "No config file found...using defaults..."
+fi
+
+.log 6 "$name v$version"
+.log 6 "Verbosity level: [${LOG_LEVELS[$verbosity]}]"
 scriptuser=$(whoami)
 .log 7 "Update script running as: $scriptuser"
 if [ -e $ombiservicefile ]; then
