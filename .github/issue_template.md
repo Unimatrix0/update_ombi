@@ -1,10 +1,14 @@
 <!--
 
-## Use the appropriate template or the issue will be summarily closed.
-### Ensure the title of your issue is short and specific.
-> e.g. "Parsing service with non-default name fails", not "Parsing problem" or "When my service file is named ombi3.service instead of ombi.service, the script is unable to parse the service file for installdir, user, and group."
-#### Remember that anything you post here is public and permanent.
-> ***Do not post any private details that you do not wish to become public.***
+Use the appropriate template or the issue will be summarily closed.
+
+Ensure the title of your issue is short and specific.
+  e.g. "Parsing service with non-default name fails", not "Parsing problem" or "When my service file is named ombi3.service instead of ombi.service, the script is unable to parse the service file for installdir, user, and group."
+  
+  
+Remember that anything you post here is public and permanent.
+
+***Do not post any private details that you do not wish to become public.***
 
 -->
 #### First Checks:
