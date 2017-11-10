@@ -1,5 +1,5 @@
 # update_ombi
-Ombi (tidusjar/Ombi) update script for Systemd (Ubuntu based distros)
+[Ombi](https://github.com/tidusjar/Ombi) update script for Systemd (Ubuntu based distros)
 
 **Create the Ombi update script**
        
