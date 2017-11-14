@@ -38,6 +38,7 @@ defaultinstalldir="/opt/Ombi"
 ##   User and Group Ombi runs as  ##
 defaultuser="ombi"
 defaultgroup="nogroup"
+defaulturl="http://127.0.0.1:5000"
 
 ##       Level of verbosity       ##
 ##        By default, none        ##
@@ -50,7 +51,7 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.0.12"
+version="1.0.13"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -123,7 +124,8 @@ if [ -e $ombiservicefile ]; then
     installdir=$(grep -Po '(?<=WorkingDirectory=)(\S|(?<=\\)\s)+' <<< "$ombiservice")
     user=$(grep -Po '(?<=User=)(\w+)' <<< "$ombiservice")
     group=$(grep -Po '(?<=Group=)(\w+)' <<< "$ombiservice")
-    .log 6 "Parsing complete: InstallDir: $installdir, User: $user, Group: $group"
+    url=$(grep -Po '(?<=\-\-host )(.+)$' <<< "$ombiservice")
+    .log 6 "Parsing complete: InstallDir: $installdir, User: $user, Group: $group, URL: $url"
 fi
 
 if [ -z ${installdir+x} ]; then
@@ -138,6 +140,11 @@ if [ -z ${group+x} ]; then
     .log 5 "Group not parsed...setting to default: $defaultgroup"
     group="$defaultgroup"
 fi
+if [ -z ${url+x} ]; then
+    .log 5 "URL not parsed...setting to default: $defaulturl"
+    url="$defaulturl"
+fi
+
 
 .log 6 "Downloading Ombi update..."
 declare -i i=1
@@ -181,7 +188,7 @@ do
 done
 tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
-wget --quiet -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/linux.tar.gz"
+wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/linux.tar.gz"
 .log 6 "Version $version downloaded...checking file size..."
 if [ $(wc -c < $file) != $size ]; then
     .log 3 "Downloaded file size does not match expected file size...bailing!"
@@ -194,7 +201,7 @@ if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
     running=1
     .log 6 "Ombi is active...attempting to stop..."
     declare -i i=1
-    j=5
+    declare -i j=5
     while [ $i -le $j ]
     do
         if [ $scriptuser = "root" ]; then
@@ -231,7 +238,7 @@ chown -R $user:$group $installdir
 if [ $running -eq 1 ]; then
     .log 6 "Ownership set...starting Ombi..."
     declare -i i=1
-    j=5
+    declare -i j=5
     while [ $i -le $j ]
     do
         if [ $scriptuser = "root" ]; then
@@ -250,7 +257,27 @@ if [ $running -eq 1 ]; then
             i+=1
             continue
         elif [ "`systemctl is-active $ombiservicename`" == "active" ]; then
-            .log 6 "Ombi started...cleaning up..."
+            .log 6 "Ombi started...waiting for confirmation..."
+            declare -i k=1
+            declare -i l=5
+            while [ $k -le $l ]
+            do
+                sleep 5
+                curl -sIL $url > /dev/null 2>&1
+                if [ $? -ne 0 ]; then
+                    if [ $k -lt $l ]; then
+                        .log 4 "Ombi startup not confirmed...waiting 5 seconds...[attempt $k of $l]"
+                    else
+                        .log 2 "Ombi startup not confirmed...[attempt $k of $l]...bailing!"
+                        exit 4
+                    fi
+                    k+=1
+                    continue
+                else
+                    .log 6 "Ombi startup confirmed...cleaning up..."
+                    break
+                fi
+            done
             break
         else
             .log 1 "Unknown error...bailing!"
