@@ -51,7 +51,8 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.0.13"
+version="1.0.14"
+SECONDS=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -80,11 +81,11 @@ function .log () {
     shift
     if [[ $verbosity =~ ^-?[0-8]$ ]]; then
             if [ $verbosity -ge $LEVEL ]; then
-            echo "[${LOG_LEVELS[$LEVEL]}]" "$@"
+            echo "[$(date '+%H:%M:%S')] [${LOG_LEVELS[$LEVEL]}]" "$@"
         fi
     fi
 	if [ $verbosity -eq 8 ] || [ $LEVEL -ne 8 ]; then
-        echo "[${LOG_LEVELS[$LEVEL]}]" "$@" >> $logfile
+        echo "[$(date '+%Y-%m-%d %H:%M:%S %Z' -u)] [${LOG_LEVELS[$LEVEL]}]" "$@" >> $logfile
     fi
 }
 
@@ -290,4 +291,20 @@ fi
 
 .log 6 "Cleaning up..."
 rm -rf "$tempdir"/* "$tempdir"
-.log 6 "Update complete"
+declare -i elapsedtime=$SECONDS
+if  [ $elapsedtime -ge 60 ]; then
+    minutes=$(($elapsedtime / 60))
+fi
+seconds=$(($elapsedtime % 60))
+if [ $minutes -ge 2 ]; then
+    duration="$minutes minutes"
+elif [ $minutes -eq 1 ]; then
+    duration="$minutes minute"
+fi
+if [ $seconds -ge 2 ]; then
+    duration+=" $seconds seconds"
+elif [ $seconds -eq 1 ]; then
+    duration+=" $seconds second"
+fi
+duration="${duration//  / }"
+.log 6 "Update complete...elapsed time $duration..."
