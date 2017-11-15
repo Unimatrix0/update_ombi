@@ -13,6 +13,7 @@ Ombi (tidusjar/Ombi) update script for Systemd (Ubuntu based distros)
 > * Installation Dir: **/opt/Ombi**
 > * User: **ombi**
 > * Group: **nogroup**
+> * URL: **http://127.0.0.1:5000**
 >
 > The script also logs to /var/log/ombiupdater.log by default. Make sure that the user running the script has write access to this file.  
 > You can override these defaults by setting the variables in the **Default variables** section at the top.
