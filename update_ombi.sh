@@ -306,5 +306,6 @@ if [ $seconds -ge 2 ]; then
 elif [ $seconds -eq 1 ]; then
     duration+=" $seconds second"
 fi
-duration="${duration//  / }"
-.log 6 "Update complete...elapsed time $duration..."
+durationmsg="Update complete...elapsed time $duration..."
+durationmsg="${durationmsg//  / }"
+.log 6 "$durationmsg"
