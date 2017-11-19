@@ -61,11 +61,11 @@ while [ $# -gt 0 ]; do
       if [[ ${1#*=} =~ ^-?[0-8]$ ]]; then
           verbosity="${1#*=}"
       else
-	      printf "****************************\n"
+          printf "****************************\n"
           printf "* Error: Invalid verbosity.*\n"
           printf "****************************\n"
           exit 1
-	  fi
+      fi
       ;;
     *)
       printf "****************************\n"
@@ -85,7 +85,7 @@ function .log () {
             echo "[$(date '+%H:%M:%S')] [${LOG_LEVELS[$LEVEL]}]" "$@"
         fi
     fi
-	if [ $verbosity -eq 8 ] || [ $LEVEL -ne 8 ]; then
+    if [ $verbosity -eq 8 ] || [ $LEVEL -ne 8 ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S %Z' -u)] [${LOG_LEVELS[$LEVEL]}]" "$@" >> $logfile
     fi
 }
@@ -125,28 +125,28 @@ if [ -e $ombiservicefile ]; then
     parseresults="Parsing complete: "
     ombiservice=$(<$ombiservicefile)
     installdir=$(grep -Po '(?<=WorkingDirectory=)(\S|(?<=\\)\s)+' <<< "$ombiservice")
-	if [ -n "${installdir}" ]; then
+    if [ -n "${installdir}" ]; then
         parseresults+="InstallDir: $installdir, "
-	fi
+    fi
     user=$(grep -Po '(?<=User=)(\w+)' <<< "$ombiservice")
-	if [ -n "${user}" ]; then
+    if [ -n "${user}" ]; then
         parseresults+="User: $user, "
-	fi
+    fi
     group=$(grep -Po '(?<=Group=)(\w+)' <<< "$ombiservice")
-	if [ -n "${group}" ]; then
+    if [ -n "${group}" ]; then
          parseresults+="Group: $group, "
-	fi
+    fi
     url=$(grep -Po '(?<=\-\-host )(http://.+)$' <<< "$ombiservice")
     ip=$(grep -Po '(?<=http://)((\d{1,3}\.){3}\d{1,3})(?=:)' <<< "$url")
-	if [ -n "${ip}" ]; then
+    if [ -n "${ip}" ]; then
         parseresults+="IP: $ip, "
-	fi
+    fi
     port=$(grep -Po '(?<=:)(\d+)$' <<< "$url")
- 	if [ -n "${port}" ]; then
+    if [ -n "${port}" ]; then
         parseresults+="Port: $port "
-	fi
+    fi
     parseresults="${parseresults//  / }"
-    parseresults="${parseresults/%, /sudo }"
+    parseresults="${parseresults/%, /}"
     .log 6 "$parseresults"
 fi
 
@@ -178,7 +178,7 @@ while [ $i -le $j ]
 do
     .log 6 "Checking for latest version"
     json=$(curl -sL https://ombiservice.azurewebsites.net/api/update/DotNetCore)
-	.log 8 "json: $json"
+    .log 8 "json: $json"
     latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
     .log 7 "latestversion: $latestversion"
     json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$latestversion)
@@ -187,10 +187,10 @@ do
     .log 7 "jobId: $jobId"
     version=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
     .log 7 "version: $version"
-	if [ $latestversion != $version ]; then
-		.log 2 "Build version does not match expected version"
-		exit 1
-	fi
+    if [ $latestversion != $version ]; then
+        .log 2 "Build version does not match expected version"
+        exit 1
+    fi
     .log 6 "Latest version: $version...determining expected file size..."
     size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="linux.tar.gz","type":"File","size":)(\d+)')
     .log 7 "size: $size"
@@ -203,10 +203,10 @@ do
         fi
         i+=1
         continue
-	elif [[ $size =~ ^-?[0-9]+$ ]]; then
+    elif [[ $size =~ ^-?[0-9]+$ ]]; then
         .log 6 "Expected file size: $size...downloading..."
         break
-	else
+    else
         .log 1 "Invalid file size value...bailing!"
         exit 99
     fi
@@ -237,7 +237,7 @@ if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
         if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" == "active" ] ; then
             if [ $i -lt $j ]; then
                 .log 3 "Failed to stop Ombi...[attempt $i of $j]"
-				sleep 1
+                sleep 1
             else
                 .log 2 "Failed to stop Ombi...[attempt $i of $j]...Bailing!"
                 exit 2
@@ -274,7 +274,7 @@ if [ $running -eq 1 ]; then
         if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" != "active" ] ; then
             if [ $i -lt $j ]; then
                 .log 3 "Failed to start Ombi...[attempt $i of $j]"
-				sleep 1
+                sleep 1
             else
                 .log 2 "Failed to start Ombi...[attempt $i of $j]...Bailing!"
                exit 3
