@@ -52,7 +52,7 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.1.01"
+version="1.1.02"
 SECONDS=0
 
 while [ $# -gt 0 ]; do
@@ -137,7 +137,7 @@ if [ -e $ombiservicefile ]; then
          parseresults+="Group: $group, "
 	fi
     url=$(grep -Po '(?<=\-\-host )(http://.+)$' <<< "$ombiservice")
-    ip=$(grep -Po '(?<=http://)([\d\.]+):' <<< "$url")
+    ip=$(grep -Po '(?<=http://)((\d{1,3}\.){3}\d{1,3})(?=:)' <<< "$url")
 	if [ -n "${ip}" ]; then
         parseresults+="IP: $ip, "
 	fi
