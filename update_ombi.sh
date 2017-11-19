@@ -38,7 +38,8 @@ defaultinstalldir="/opt/Ombi"
 ##   User and Group Ombi runs as  ##
 defaultuser="ombi"
 defaultgroup="nogroup"
-defaulturl="http://127.0.0.1:5000"
+defaultip="127.0.0.1"
+defaultport="5000"
 
 ##       Level of verbosity       ##
 ##        By default, none        ##
@@ -51,7 +52,7 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.0.14"
+version="1.1.01"
 SECONDS=0
 
 while [ $# -gt 0 ]; do
@@ -121,31 +122,54 @@ scriptuser=$(whoami)
 .log 7 "Update script running as: $scriptuser"
 if [ -e $ombiservicefile ]; then
     .log 6 "Ombi service file for systemd found...parsing..."
+    parseresults="Parsing complete: "
     ombiservice=$(<$ombiservicefile)
     installdir=$(grep -Po '(?<=WorkingDirectory=)(\S|(?<=\\)\s)+' <<< "$ombiservice")
+	if [ -n "${installdir}" ]; then
+        parseresults+="InstallDir: $installdir, "
+	fi
     user=$(grep -Po '(?<=User=)(\w+)' <<< "$ombiservice")
+	if [ -n "${user}" ]; then
+        parseresults+="User: $user, "
+	fi
     group=$(grep -Po '(?<=Group=)(\w+)' <<< "$ombiservice")
-    url=$(grep -Po '(?<=\-\-host )(.+)$' <<< "$ombiservice")
-    .log 6 "Parsing complete: InstallDir: $installdir, User: $user, Group: $group, URL: $url"
+	if [ -n "${group}" ]; then
+         parseresults+="Group: $group, "
+	fi
+    url=$(grep -Po '(?<=\-\-host )(http://.+)$' <<< "$ombiservice")
+    ip=$(grep -Po '(?<=http://)([\d\.]+):' <<< "$url")
+	if [ -n "${ip}" ]; then
+        parseresults+="IP: $ip, "
+	fi
+    port=$(grep -Po '(?<=:)(\d+)$' <<< "$url")
+ 	if [ -n "${port}" ]; then
+        parseresults+="Port: $port "
+	fi
+    parseresults="${parseresults//  / }"
+    parseresults="${parseresults/%, /sudo }"
+    .log 6 "$parseresults"
 fi
 
-if [ -z ${installdir+x} ]; then
+if [ -z "${installdir}" ]; then
     .log 5 "InstallDir not parsed...setting to default: $defaultinstalldir"
     installdir="$defaultinstalldir"
 fi
-if [ -z ${user+x} ]; then
+if [ -z "${user}" ]; then
     .log 5 "User not parsed...setting to default: $defaultuser"
     user="$defaultuser"
 fi
-if [ -z ${group+x} ]; then
+if [ -z "${group}" ]; then
     .log 5 "Group not parsed...setting to default: $defaultgroup"
     group="$defaultgroup"
 fi
-if [ -z ${url+x} ]; then
-    .log 5 "URL not parsed...setting to default: $defaulturl"
-    url="$defaulturl"
+if [ -z "${ip}" ]; then
+    .log 5 "IP not parsed or set as \"*\"...setting to default: $defaultip"
+    ip="$defaultip"
 fi
-
+if [ -z "${port}" ]; then
+    .log 5 "Port not parsed...setting to default: $defaultport"
+    port="$defaultport"
+fi
 
 .log 6 "Downloading Ombi update..."
 declare -i i=1
@@ -264,7 +288,7 @@ if [ $running -eq 1 ]; then
             while [ $k -le $l ]
             do
                 sleep 5
-                curl -sIL $url > /dev/null 2>&1
+                curl -sIL $ip:$port > /dev/null 2>&1
                 if [ $? -ne 0 ]; then
                     if [ $k -lt $l ]; then
                         .log 4 "Ombi startup not confirmed...waiting 5 seconds...[attempt $k of $l]"
@@ -292,6 +316,8 @@ fi
 .log 6 "Cleaning up..."
 rm -rf "$tempdir"/* "$tempdir"
 declare -i elapsedtime=$SECONDS
+declare -i minutes=0
+declare -i seconds=0
 if  [ $elapsedtime -ge 60 ]; then
     minutes=$(($elapsedtime / 60))
 fi
