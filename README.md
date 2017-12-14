@@ -47,3 +47,37 @@ ombi    ALL=NOPASSWD: /bin/systemctl stop ombi.service, /bin/systemctl start omb
 
 > ### Note:
 > This assumes you're running the script as **ombi** and that the systemd service is named **ombi**.
+
+**Configuration File Support with Variables**
+
+In order to ensure that update_ombi applys updates based on your exact configuration, you may need to create a configuration file. update-ombi looks for `update_ombi.conf` in the same directory as `update_ombi.sh`. 
+
+|Variable|Comment|Default Value|
+|:----------:|:-------------:|:--------------:|
+|*ombiservicename*|The systemd unit for Ombi|ombi|
+|*logfile*|The update_ombi log file|/var/log/ombiupdater.log|
+|*ombiservicefile*|The service file's full path|/etc/systemd/system/$ombiservicename.service|
+|*defaultinstalldir*|Ombi install directory|/opt/Ombi|
+|*defaultuser*|The user Ombi runs as|ombi|
+|*defaultgroup*|The group Ombi runs as|nogroup|
+|*defaultip*|The IP Ombi runs on|127.0.0.1|
+|*defaultport*|The port Ombi runs on|5000|
+|*verbosity*|Level of verbosity (-1 to 8), see Log Levels below|-1|
+
+**Log Levels**
+
+By default, verbosity is set to -1, which means it will not output anything. Using switch `-v=#` or `--verbosity #`. Options 1 through 7 will log to STDOUT. Option 8 logs to STDOUT and the logfile. The default log location is `/var/log/ombiupdater.log`.
+
+|Log Level|Status|
+|:--:|:--:|
+|-1|None|
+|0|Emergency|
+|1|Alert|
+|2|Critical|
+|3|Error|
+|4|Warning|
+|5|Notice|
+|6|Info|
+|7|Debug|
+|8|Trace|
+
