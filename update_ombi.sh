@@ -45,6 +45,7 @@ defaultport="5000"
 ##        By default, none        ##
 
 declare -i verbosity=-1
+configfile=''
 
 ############################################
 ## Do not modify anything below this line ##
@@ -64,6 +65,16 @@ while [ $# -gt 0 ]; do
           printf "****************************\n"
           printf "* Error: Invalid verbosity.*\n"
           printf "****************************\n"
+          exit 1
+      fi
+      ;;
+    --config|-c=*)
+      if [[ ${1#*=} =~ ^\"?.*\.conf\"?$ ]]; then
+          configfile="${1#*=}"
+      else
+          printf "******************************\n"
+          printf "* Error: Invalid config path.*\n"
+          printf "******************************\n"
           exit 1
       fi
       ;;
@@ -103,10 +114,14 @@ unzip-strip() (
 )
 
 # Import any custom config to override the defaults, if necessary
-configfile="$(dirname $0)/update_ombi.conf"
+if [ -z "$configfile" ]; then
+    configfile="$(dirname $0)/update_ombi.conf"
+fi
+
 if [ -e $configfile ]; then
     source $configfile > /dev/null 2>&1
     .log 6 "Script config file found...parsing..."
+    .log 7 "Config path is: $configfile"
     if [ $? -ne 0 ] ; then
         .log 3 "Unable to use config file...using defaults..."
     else
