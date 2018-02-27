@@ -177,7 +177,7 @@ declare -i j=5
 while [ $i -le $j ]
 do
     .log 6 "Checking for latest version"
-    json=$(curl -sL https://ombiservice.azurewebsites.net/api/update/DotNetCore)
+    json=$(curl -sL http://$ip:$port/api/v1/Update/DotNetCore)
     .log 8 "json: $json"
     latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
     .log 7 "latestversion: $latestversion"
