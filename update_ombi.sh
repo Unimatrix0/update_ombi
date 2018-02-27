@@ -41,6 +41,9 @@ defaultgroup="nogroup"
 defaultip="127.0.0.1"
 defaultport="5000"
 
+##     API Key from settings      ##
+defaultapikey=""
+
 ##       Level of verbosity       ##
 ##        By default, none        ##
 
@@ -170,6 +173,10 @@ if [ -z "${port}" ]; then
     .log 5 "Port not parsed...setting to default: $defaultport"
     port="$defaultport"
 fi
+if [ -z "${apikey}" ]; then
+    .log 5 "API Key not parsed...setting to default: $apikey"
+    apikey="$defaultapikey"
+fi
 
 .log 6 "Downloading Ombi update..."
 declare -i i=1
@@ -181,6 +188,29 @@ do
     .log 8 "json: $json"
     latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
     .log 7 "latestversion: $latestversion"
+    if [ $apikey != "" ]; then
+        .log 6 "Checking for current version"
+        json=$(curl -sL --header "ApiKey: $apikey" http://$ip:$port/api/v1/Settings/about)
+        .log 8 "json: $json"
+        currentversion=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
+        .log 7 "currentversion: $currentversion"
+        currentmajor=$(echo $currentversion | cut -d'.' -f 1)
+        currentminor=$(echo $currentversion | cut -d'.' -f 2)
+        currentbuild=$(echo $currentversion | cut -d'.' -f 3)
+        latestmajor=$(echo $latestversion | cut -d'.' -f 1)
+        latestminor=$(echo $latestversion | cut -d'.' -f 2)
+        latestbuild=$(echo $latestversion | cut -d'.' -f 3)
+        if [ $currentmajor -ge $latestmajor ]; then
+            if [ $currentminor -ge $latestminor ]; then
+                if [ $currentbuild -ge $latestbuild ]; then
+                    .log 5 "Current version is up to date"
+                    exit 1
+                fi
+            fi
+        fi
+    else
+        .log 5 "Please set apikey to check for current version and prevent running unneeded updates"
+    fi
     json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$latestversion)
     .log 8 "json: $json"
     jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
