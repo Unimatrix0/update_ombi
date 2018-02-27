@@ -102,6 +102,14 @@ unzip-strip() (
     fi && rm -rf "$temp"/* "$temp"
 )
 
+IsSystemdSupported() {
+    if command -v systemctl > /dev/null && systemctl | grep -q '\-\.mount'; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Import any custom config to override the defaults, if necessary
 configfile="$(dirname $0)/update_ombi.conf"
 if [ -e $configfile ]; then
@@ -222,38 +230,42 @@ fi
 .log 6 "File size validated...checking Ombi service status..."
 
 declare -i running=0
-if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
-    running=1
-    .log 6 "Ombi is active...attempting to stop..."
-    declare -i i=1
-    declare -i j=5
-    while [ $i -le $j ]
-    do
-        if [ $scriptuser = "root" ]; then
-            systemctl stop $ombiservicename.service > /dev/null 2>&1
-        else
-            sudo systemctl stop $ombiservicename.service > /dev/null 2>&1
-        fi
-        if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" == "active" ] ; then
-            if [ $i -lt $j ]; then
-                .log 3 "Failed to stop Ombi...[attempt $i of $j]"
-                sleep 1
+if IsSystemdSupported; then
+    if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
+        running=1
+        .log 6 "Ombi is active...attempting to stop..."
+        declare -i i=1
+        declare -i j=5
+        while [ $i -le $j ]
+        do
+            if [ $scriptuser = "root" ]; then
+                systemctl stop $ombiservicename.service > /dev/null 2>&1
             else
-                .log 2 "Failed to stop Ombi...[attempt $i of $j]...Bailing!"
-                exit 2
+                sudo systemctl stop $ombiservicename.service > /dev/null 2>&1
             fi
-            i+=1
-            continue
-        elif [ "`systemctl is-active $ombiservicename`" == "inactive" ]; then
-            .log 6 "Ombi stopped...installing update..."
-            break
-        else
-            .log 1 "Unknown error...bailing!"
-            exit 99
-        fi
-    done
+            if [ $? -ne 0 ] || [ "`systemctl is-active $ombiservicename`" == "active" ] ; then
+                if [ $i -lt $j ]; then
+                    .log 3 "Failed to stop Ombi...[attempt $i of $j]"
+                    sleep 1
+                else
+                    .log 2 "Failed to stop Ombi...[attempt $i of $j]...Bailing!"
+                    exit 2
+                fi
+                i+=1
+                continue
+            elif [ "`systemctl is-active $ombiservicename`" == "inactive" ]; then
+                .log 6 "Ombi stopped...installing update..."
+                break
+            else
+                .log 1 "Unknown error...bailing!"
+                exit 99
+            fi
+        done
+    else
+        .log 6 "Ombi is not active...installing update..."
+    fi
 else
-    .log 6 "Ombi is not active...installing update..."
+    .log 4 "systemd not available..."
 fi
 
 unzip-strip $file $installdir
