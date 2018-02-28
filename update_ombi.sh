@@ -215,7 +215,7 @@ tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
 wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/linux.tar.gz"
 .log 6 "Version $version downloaded...checking file size..."
-if [ $(wc -c < $file) != $size ]; then
+if [ "$(wc -c < $file)" != $size ]; then
     .log 3 "Downloaded file size does not match expected file size...bailing!"
     exit 2
 fi
