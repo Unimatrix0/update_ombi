@@ -99,7 +99,7 @@ unzip-strip() (
         cp -r "$temp"/*/* "$dest"
     else
         cp -r "$temp"/* "$dest"
-    fi && rm -rf "$temp"/* "$temp"
+    fi && rm -rf "${temp:?}"/* "$temp"
 )
 
 # Import any custom config to override the defaults, if necessary
@@ -314,7 +314,7 @@ else
 fi
 
 .log 6 "Cleaning up..."
-rm -rf "$tempdir"/* "$tempdir"
+rm -rf "${tempdir:?}"/* "$tempdir"
 declare -i elapsedtime=$SECONDS
 declare -i minutes=0
 declare -i seconds=0
