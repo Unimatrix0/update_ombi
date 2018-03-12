@@ -54,6 +54,8 @@ declare -i verbosity=-1
 name="update_ombi"
 version="1.1.02"
 SECONDS=0
+arch=$(uname -m)
+archshort=${arch:0:3}
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -172,6 +174,11 @@ if [ -z "${port}" ]; then
 fi
 
 .log 6 "Downloading Ombi update..."
+if [ "$archshort" = 'arm' ]; then
+    filename='linux-arm.tar.gz'
+  else
+    filename='linux.tar.gz'
+fi
 declare -i i=1
 declare -i j=5
 while [ $i -le $j ]
@@ -192,7 +199,7 @@ do
         exit 1
     fi
     .log 6 "Latest version: $version...determining expected file size..."
-    size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="linux.tar.gz","type":"File","size":)(\d+)')
+    size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="'$filename'","type":"File","size":)(\d+)')
     .log 7 "size: $size"
     if [ -e $size ]; then
         if [ $i -lt $j ]; then
@@ -213,7 +220,7 @@ do
 done
 tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
-wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/linux.tar.gz"
+wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
 .log 6 "Version $version downloaded...checking file size..."
 if [ $(wc -c < $file) != $size ]; then
     .log 3 "Downloaded file size does not match expected file size...bailing!"
