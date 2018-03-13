@@ -101,7 +101,7 @@ unzip-strip() (
         cp -r "$temp"/*/* "$dest"
     else
         cp -r "$temp"/* "$dest"
-    fi && rm -rf "$temp"/* "$temp"
+    fi && rm -rf "${temp:?}"/* "$temp"
 )
 
 # Import any custom config to override the defaults, if necessary
@@ -222,7 +222,7 @@ tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
 wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
 .log 6 "Version $version downloaded...checking file size..."
-if [ $(wc -c < $file) != $size ]; then
+if [ "$(wc -c < $file)" != $size ]; then
     .log 3 "Downloaded file size does not match expected file size...bailing!"
     exit 2
 fi
@@ -321,7 +321,7 @@ else
 fi
 
 .log 6 "Cleaning up..."
-rm -rf "$tempdir"/* "$tempdir"
+rm -rf "${tempdir:?}"/* "$tempdir"
 declare -i elapsedtime=$SECONDS
 declare -i minutes=0
 declare -i seconds=0
