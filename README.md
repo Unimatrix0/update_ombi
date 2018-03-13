@@ -50,7 +50,7 @@ ombi    ALL=NOPASSWD: /bin/systemctl stop ombi.service, /bin/systemctl start omb
 
 **Configuration File Support with Variables**
 
-In order to ensure that update_ombi applys updates based on your exact configuration, you may need to create a configuration file. update-ombi looks for `update_ombi.conf` in the same directory as `update_ombi.sh`. 
+In order to ensure that this script applies updates correctly for your environment, you may need to create a configuration file. This script looks for `update_ombi.conf` in the same directory as `update_ombi.sh`. 
 
 |Variable|Comment|Default Value|
 |:----------:|:-------------:|:--------------:|
