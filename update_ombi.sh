@@ -60,11 +60,23 @@ archshort=${arch:0:3}
 while [ $# -gt 0 ]; do
   case "$1" in
     --verbosity|-v=*)
+      shift
       if [[ ${1#*=} =~ ^-?[0-8]$ ]]; then
           verbosity="${1#*=}"
       else
           printf "****************************\n"
           printf "* Error: Invalid verbosity.*\n"
+          printf "****************************\n"
+          exit 1
+      fi
+      ;;
+    --force|-f=*)
+      shift
+      if [[ ${1#*=} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          force="${1#*=}"
+      else
+          printf "****************************\n"
+          printf "* Error: Invalid version.  *\n"
           printf "****************************\n"
           exit 1
       fi
@@ -188,6 +200,10 @@ do
     .log 8 "json: $json"
     latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
     .log 7 "latestversion: $latestversion"
+    if [ -n "$force" ]; then
+        latestversion=$force
+        .log 7 "forcing version: $latestversion"
+    fi
     json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$latestversion)
     .log 8 "json: $json"
     jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
