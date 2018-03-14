@@ -52,7 +52,7 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.1.02"
+version="1.2.00"
 SECONDS=0
 arch=$(uname -m)
 archshort=${arch:0:3}
