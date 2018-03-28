@@ -52,7 +52,7 @@ declare -i verbosity=-1
 ############################################
 
 name="update_ombi"
-version="1.2.00"
+version="1.3.00"
 SECONDS=0
 arch=$(uname -m)
 archshort=${arch:0:3}
@@ -278,6 +278,10 @@ if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
 else
     .log 6 "Ombi is not active...installing update..."
 fi
+
+declare -i timestamp=$(date +%s)
+.log 6 "Backing up Ombi.db to Ombi.db.$timestamp"
+cp ${installdir}Ombi.db ${installdir}Ombi.db.$timestamp
 
 unzip-strip $file $installdir
 .log 6 "Update installed...setting ownership..."
