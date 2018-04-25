@@ -281,7 +281,7 @@ fi
 
 declare -i timestamp=$(date +%s)
 .log 6 "Backing up Ombi.db to Ombi.db.$timestamp"
-cp ${installdir}Ombi.db ${installdir}Ombi.db.$timestamp
+cp ${installdir}/Ombi.db ${installdir}/Ombi.db.$timestamp
 
 unzip-strip $file $installdir
 .log 6 "Update installed...setting ownership..."
