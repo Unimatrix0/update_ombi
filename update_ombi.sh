@@ -3,6 +3,7 @@
 ####################################
 ##   update_ombi systemd script   ##
 ## GitHub: Unimatrix0/update_ombi ##
+## updated by: metalcated         ##
 ####################################
 
 ####################################
@@ -195,22 +196,34 @@ declare -i i=1
 declare -i j=5
 while [ $i -le $j ]
 do
-    .log 6 "Checking for latest version"
+    .log 6 "Checking locally installed version"
     json=$(curl -sL http://$ip:$port/api/v1/Update/develop)
     .log 8 "json: $json"
-    latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
-    .log 7 "latestversion: $latestversion"
+    localversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
+    .log 7 "localversion: $localversion"
     if [ -n "$force" ]; then
-        latestversion=$force
-        .log 7 "forcing version: $latestversion"
+        localversion=$force
+        .log 7 "forcing version: $localversion"
     fi
-    json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$latestversion)
+    .log 6 "Checking for latest available version"
+    json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex)
+    .log 8 "json: $json"
+    jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
+    .log 7 "jobId: $jobId"
+    latestversion=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
+    .log 7 "version: $version"
+    if [ $latestversion = $localversion ]; then
+        .log 2 "Latest Available Version: $latestversion and $localversion match, no update needed"
+        echo "Latest Available Version: $latestversion and $localversion match, no update needed"
+        exit 1
+    fi
+    json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$localversion)
     .log 8 "json: $json"
     jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
     .log 7 "jobId: $jobId"
     version=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
     .log 7 "version: $version"
-    if [ $latestversion != $version ]; then
+    if [ $localversion != $version ]; then
         .log 2 "Build version does not match expected version"
         exit 1
     fi
@@ -280,9 +293,10 @@ else
 fi
 
 declare -i timestamp=$(date +%s)
-.log 6 "Backing up Ombi.db to Ombi.db.$timestamp"
-cp ${installdir}Ombi.db ${installdir}Ombi.db.$timestamp
-
+for db in $(ls /etc/Ombi/*.db); do
+        .log 6 "Backing up ${db} ${db}.${timestamp}"
+        cp -vp {${db},${db}.${timestamp}}
+done
 unzip-strip $file $installdir
 .log 6 "Update installed...setting ownership..."
 chown -R $user:$group $installdir
