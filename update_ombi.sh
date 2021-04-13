@@ -187,9 +187,9 @@ fi
 
 .log 6 "Downloading Ombi update..."
 if [ "$archshort" = 'arm' ]; then
-    filename='linux-arm.tar.gz'
+    filename='linux-arm64.tar.gz'
   else
-    filename='linux.tar.gz'
+    filename='linux-x64.tar.gz'
 fi
 declare -i i=1
 declare -i j=5
