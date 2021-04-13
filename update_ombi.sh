@@ -40,6 +40,7 @@ defaultuser="ombi"
 defaultgroup="nogroup"
 defaultip="127.0.0.1"
 defaultport="5000"
+baseurl="" # Put your baseurl here if you're using one
 
 ##       Level of verbosity       ##
 ##        By default, none        ##
@@ -196,7 +197,11 @@ declare -i j=5
 while [ $i -le $j ]
 do
     .log 6 "Checking for latest version"
-    json=$(curl -sL http://$ip:$port/api/v1/Update/develop)
+    if [ -z "$baseurl" ]; then
+      json=$(curl -sL http://$ip:$port/$baseurl/api/v1/Update)
+      else
+        json=$(curl -sL http://$ip:$port/api/v1/Update)
+    fi
     .log 8 "json: $json"
     latestversion=$(grep -Po '(?<="updateVersionString":")([^"]+)' <<<  "$json")
     .log 7 "latestversion: $latestversion"
