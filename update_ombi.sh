@@ -209,16 +209,16 @@ do
         latestversion=$force
         .log 7 "forcing version: $latestversion"
     fi
-    json=$(curl -sL https://github.com/Ombi-app/Ombi.Releases/releases/tag/$latestversion)
-    .log 8 "json: $json"
-    jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
-    .log 7 "jobId: $jobId"
-    version=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
-    .log 7 "version: $version"
-    if [ $latestversion != $version ]; then
-        .log 2 "Build version does not match expected version"
-        exit 1
-    fi
+    #json=$(curl -sL https://github.com/Ombi-app/Ombi.Releases/releases/tag/$latestversion)
+    #.log 8 "json: $json"
+    #jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
+    #.log 7 "jobId: $jobId"
+    #version=$(grep -Po '(?<="version":")([^"]+)' <<<  "$json")
+    #.log 7 "version: $version"
+    #if [ $latestversion != $version ]; then
+    #    .log 2 "Build version does not match expected version"
+    #    exit 1
+    #fi
     #.log 6 "Latest version: $version...determining expected file size..."
     #size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="'$filename'","type":"File","size":)(\d+)')
     #.log 7 "size: $size"
