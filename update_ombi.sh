@@ -219,25 +219,25 @@ do
         .log 2 "Build version does not match expected version"
         exit 1
     fi
-    .log 6 "Latest version: $version...determining expected file size..."
-    size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="'$filename'","type":"File","size":)(\d+)')
-    .log 7 "size: $size"
-    if [ -e $size ]; then
-        if [ $i -lt $j ]; then
-            .log 3 "Unable to determine update file size...[attempt $i of $j]"
-        else
-            .log 2 "Unable to determine update file size...[attempt $i of $j]...Bailing!"
-            exit 2
-        fi
-        i+=1
-        continue
-    elif [[ $size =~ ^-?[0-9]+$ ]]; then
-        .log 6 "Expected file size: $size...downloading..."
-        break
-    else
-        .log 1 "Invalid file size value...bailing!"
-        exit 99
-    fi
+    #.log 6 "Latest version: $version...determining expected file size..."
+    #size=$(curl -sL https://ci.appveyor.com/api/buildjobs/$jobId/artifacts | grep -Po '(?<="'$filename'","type":"File","size":)(\d+)')
+    #.log 7 "size: $size"
+    #if [ -e $size ]; then
+    #    if [ $i -lt $j ]; then
+    #        .log 3 "Unable to determine update file size...[attempt $i of $j]"
+    #    else
+    #        .log 2 "Unable to determine update file size...[attempt $i of $j]...Bailing!"
+    #        exit 2
+    #    fi
+    #    i+=1
+    #    continue
+    #elif [[ $size =~ ^-?[0-9]+$ ]]; then
+    #    .log 6 "Expected file size: $size...downloading..."
+    #    break
+    #else
+    #    .log 1 "Invalid file size value...bailing!"
+    #    exit 99
+    #fi
 done
 tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
