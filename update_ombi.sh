@@ -241,13 +241,13 @@ do
 done
 tempdir=$(mktemp -d)
 file="$tempdir/ombi_$version.tar.gz"
-wget --quiet --show-progress -O $file "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
-.log 6 "Version $version downloaded...checking file size..."
-if [ "$(wc -c < $file)" != $size ]; then
-    .log 3 "Downloaded file size does not match expected file size...bailing!"
-    exit 2
-fi
-.log 6 "File size validated...checking Ombi service status..."
+wget --quiet --show-progress -O $file "https://github.com/Ombi-app/Ombi/releases/download/$latestversion/$filename"
+#.log 6 "Version $version downloaded...checking file size..."
+#if [ "$(wc -c < $file)" != $size ]; then
+#    .log 3 "Downloaded file size does not match expected file size...bailing!"
+#    exit 2
+#fi
+.log 6 "Checking Ombi service status..."
 
 declare -i running=0
 if [ "`systemctl is-active $ombiservicename`" == "active" ]; then
