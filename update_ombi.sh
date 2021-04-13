@@ -209,7 +209,7 @@ do
         latestversion=$force
         .log 7 "forcing version: $latestversion"
     fi
-    json=$(curl -sL https://ci.appveyor.com/api/projects/tidusjar/requestplex/build/$latestversion)
+    json=$(curl -sL https://github.com/Ombi-app/Ombi.Releases/releases/tag/$latestversion)
     .log 8 "json: $json"
     jobId=$(grep -Po '(?<="jobId":")([^"]+)' <<<  "$json")
     .log 7 "jobId: $jobId"
